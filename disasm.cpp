@@ -9,43 +9,43 @@ int main ()
 
     int x = 0;
 
-    while (x != HLT)
+    while (x != cmd_HLT)
     {
         fscanf (infile, "%d", &x);
         elem_t elem = 0;
         switch (x)
         {
 
-        case push:
+        case cmd_push:
             fscanf (infile, "%d", &elem);
             fprintf (outfile, "push %d\n", elem);
             break;
 
-        case add:
+        case cmd_add:
             fputs ("add\n", outfile);
             break;
 
-        case sub:
+        case cmd_sub:
             fputs ("sub\n", outfile);
             break;
 
-        case mul:
+        case cmd_mul:
             fputs ("mul\n", outfile);
             break;
 
-        case divi:
+        case cmd_div:
             fputs ("divi\n", outfile);
             break;
 
-        case in:
+        case cmd_in:
             fputs ("in\n", outfile);
             break;
 
-        case out:
+        case cmd_out:
             fputs ("out\n", outfile);
             break;
 
-        case rpush:
+        case cmd_rpush:
             fscanf (infile, "%d", &elem);
             fputs ("push ", outfile);
             switch (elem)
@@ -65,7 +65,7 @@ int main ()
             }
             break;
 
-        case pop:
+        case cmd_pop:
             fscanf (infile, "%d", &elem);
             fputs ("pop ", outfile);
             switch (elem)
