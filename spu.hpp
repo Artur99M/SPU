@@ -18,12 +18,12 @@ enum spu {
     rpush = 17,
     pop = 24,
     jmp = 33,
-    jb = 34, // <
-    jbe = 35, // ≤
-    ja = 36, // >
-    ja = 37, // ≥
-    je = 38, // ==
-    jne = 39, // ≠
+    jb = 34, rjb = 50, // <
+    jbe = 35, rjbe = 51, // ≤
+    ja = 36, rja = 52, // >
+    jba = 37, rjba = 53, // ≥
+    je = 38, rje = 54, // ==
+    jne = 39, rjne = 55, // ≠
 };
 
 enum reg {ax = 1, bx = 2, cx = 3, dx = 4};
