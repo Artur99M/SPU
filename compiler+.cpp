@@ -10,47 +10,47 @@ int main()
     int* program;
     ProgramCtor (&program, "asm.txt");
 
-    for (int i = 0; program[i] != HLT; i++)
+    for (int i = 0; program[i] != cmd_HLT; i++)
     {
         int x = program[i];
         elem_t elem = 0;
         switch (x)
         {
 
-        case push:
+        case cmd_push:
             elem = program[++i];
             StackPush (&(p.stk), elem);
             break;
 
-        case add:
+        case cmd_add:
             StackPush (&(p.stk), StackPop (&(p.stk)) + StackPop (&(p.stk)));
             break;
 
-        case sub:
+        case cmd_sub:
             elem = StackPop (&(p.stk));
             StackPush (&(p.stk), StackPop (&(p.stk)) - elem);
             break;
 
-        case mul:
+        case cmd_mul:
             StackPush (&(p.stk), StackPop (&(p.stk)) * StackPop (&(p.stk)));
             break;
 
-        case divi:
+        case cmd_div:
             elem = StackPop (&(p.stk));
             StackPush (&(p.stk), StackPop (&(p.stk)) / elem);
             break;
 
-        case in:
+        case cmd_in:
             putchar ('>');
             scanf ("%d", &elem);
             StackPush (&(p.stk), elem);
             break;
 
-        case out:
+        case cmd_out:
             printf ("%d\n", StackPop (&(p.stk)));
             break;
 
-        case rpush:
+        case cmd_rpush:
             elem = program[++i];
 
                 switch (elem)
@@ -70,7 +70,7 @@ int main()
                 }
 
             break;
-        case pop:
+        case cmd_pop:
             elem = program[++i];
             switch (elem)
             {
