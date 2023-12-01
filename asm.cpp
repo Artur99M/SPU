@@ -15,31 +15,31 @@ int main ()
 
         if (strcmp (s, "HLT") == 0)
         {
-            fprintf (outfile, "%d", HLT);
+            fprintf (outfile, "%d", cmd_HLT);
 
         } else if (strcmp (s, "add") == 0)
         {
-            fprintf (outfile, "%d\n", add);
+            fprintf (outfile, "%d\n", cmd_add);
 
         } else if (strcmp (s, "sub") == 0)
         {
-            fprintf (outfile, "%d\n", sub);
+            fprintf (outfile, "%d\n", cmd_sub);
 
         } else if (strcmp (s, "mul") == 0)
         {
-            fprintf (outfile, "%d\n", mul);
+            fprintf (outfile, "%d\n", cmd_mul);
 
         } else if (strcmp (s, "divi") == 0)
         {
-            fprintf (outfile, "%d\n", divi);
+            fprintf (outfile, "%d\n", cmd_div);
 
         } else if (strcmp (s, "in") == 0)
         {
-            fprintf (outfile, "%d\n", in);
+            fprintf (outfile, "%d\n", cmd_in);
 
         } else if (strcmp (s, "out") == 0)
         {
-            fprintf (outfile, "%d\n", out);
+            fprintf (outfile, "%d\n", cmd_out);
 
         } else if (strcmp (s, "push") == 0)
         {
@@ -47,7 +47,7 @@ int main ()
 
             if (fscanf (infile, "%d", &x) == 1)
             {
-                fprintf (outfile, "%d %d\n", push, x);
+                fprintf (outfile, "%d %d\n", cmd_push, x);
 
             } else
             {
@@ -55,16 +55,16 @@ int main ()
                 fscanf (infile, "%s", y);
                 if (strcmp (y, "ax") == 0)
                 {
-                    fprintf (outfile, "%d %d\n", rpush, ax);
+                    fprintf (outfile, "%d %d\n", cmd_rpush, ax);
                 } else if (strcmp (y, "bx") == 0)
                 {
-                    fprintf (outfile, "%d %d\n", rpush, bx);
+                    fprintf (outfile, "%d %d\n", cmd_rpush, bx);
                 } else if (strcmp (y, "cx") == 0)
                 {
-                    fprintf (outfile, "%d %d\n", rpush, cx);
+                    fprintf (outfile, "%d %d\n", cmd_rpush, cx);
                 } else if (strcmp (y, "dx") == 0)
                 {
-                    fprintf (outfile, "%d %d\n", rpush, dx);
+                    fprintf (outfile, "%d %d\n", cmd_rpush, dx);
                 } else
                 {
                     fprintf (outfile, "ERROR\n");
@@ -79,16 +79,16 @@ int main ()
             fscanf (infile, "%s", x);
             if (strcmp (x, "ax") == 0)
             {
-                fprintf (outfile, "%d %d\n", pop, ax);
+                fprintf (outfile, "%d %d\n", cmd_pop, ax);
             } else if (strcmp (x, "bx") == 0)
             {
-                fprintf (outfile, "%d %d\n", pop, bx);
+                fprintf (outfile, "%d %d\n", cmd_pop, bx);
             } else if (strcmp (x, "cx") == 0)
             {
-                fprintf (outfile, "%d %d\n", pop, cx);
+                fprintf (outfile, "%d %d\n", cmd_pop, cx);
             } else if (strcmp (x, "dx") == 0)
             {
-                fprintf (outfile, "%d %d\n", pop, dx);
+                fprintf (outfile, "%d %d\n", cmd_pop, dx);
             } else
             {
                 fprintf (outfile, "ERROR\n");
