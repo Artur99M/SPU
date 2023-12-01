@@ -7,23 +7,23 @@
 #define SPU_DUMP(p) SpuDump (p, #p, __FILE__, __LINE__, __func__)
 
 enum spu {
-    HLT = -1,
-    push = 1,
-    add = 2,
-    sub = 3,
-    mul = 4,
-    divi = 5,
-    out = 6,
-    in = 7,
-    rpush = 17,
-    pop = 24,
-    jmp = 33,
-    jb = 34, rjb = 50, // <
-    jbe = 35, rjbe = 51, // ≤
-    ja = 36, rja = 52, // >
-    jba = 37, rjba = 53, // ≥
-    je = 38, rje = 54, // ==
-    jne = 39, rjne = 55, // ≠
+    cmd_HLT = -1,
+    cmd_push = 1,
+    cmd_add = 2,
+    cmd_sub = 3,
+    cmd_mul = 4,
+    cmd_div = 5,
+    cmd_out = 6,
+    cmd_in = 7,
+    cmd_rpush = 17,
+    cmd_pop = 24,
+    cmd_jmp = 33,
+    cmd_jb = 34, cmd_rjb = 50, // <
+    cmd_jbe = 35, cmd_rjbe = 51, // ≤
+    cmd_ja = 36, cmd_rja = 52, // >
+    cmd_jba = 37, cmd_rjba = 53, // ≥
+    cmd_je = 38, cmd_rje = 54, // ==
+    cmd_jne = 39, cmd_rjne = 55, // ≠
 };
 
 enum reg {ax = 1, bx = 2, cx = 3, dx = 4};
