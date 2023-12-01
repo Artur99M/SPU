@@ -6,10 +6,25 @@
 #include "Stack2/stack_protection.h"
 #define SPU_DUMP(p) SpuDump (p, #p, __FILE__, __LINE__, __func__)
 
-enum spu {HLT = -1, push = 1, add = 2, sub = 3, mul = 4, divi = 5, out = 6, in = 7,
-          rpush = 17, pop = 24}; // |0|0|0|0||0|0|0|0| < часть, отвечающая за номер функции
-//                                   ? ? ? ^  почему может быть всего 16 команд?
-//                             другие биты|бит наличия регистра
+enum spu {
+    HLT = -1,
+    push = 1,
+    add = 2,
+    sub = 3,
+    mul = 4,
+    divi = 5,
+    out = 6,
+    in = 7,
+    rpush = 17,
+    pop = 24,
+    jmp = 33,
+    jb = 34, // <
+    jbe = 35, // ≤
+    ja = 36, // >
+    ja = 37, // ≥
+    je = 38, // ==
+    jne = 39, // ≠
+};
 
 enum reg {ax = 1, bx = 2, cx = 3, dx = 4};
 
