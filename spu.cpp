@@ -11,6 +11,8 @@ int SpuCtor (SPU* p)
     p->rcx = 0;
     p->rdx = 0;
 
+    p->ip = 0;
+
     if (StackCtor (&(p->stk)) != 0) return 2;
 
     return 0;
@@ -23,6 +25,8 @@ int SpuDtor (SPU* p)
     p->rbx = 0;
     p->rcx = 0;
     p->rdx = 0;
+
+    p->ip = 0;
 
     if (StackDtor (&(p->stk)) != 0) return 2;
 
