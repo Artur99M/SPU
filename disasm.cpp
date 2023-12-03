@@ -34,7 +34,7 @@ int main ()
             break;
 
         case cmd_div:
-            fputs ("divi\n", outfile);
+            fputs ("div\n", outfile);
             break;
 
         case cmd_in:
@@ -85,9 +85,50 @@ int main ()
             }
             break;
 
+        case cmd_jmp:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "jmp %d\n", elem);
+            break;
+
+        case cmd_je:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "je %d\n", elem);
+            break;
+
+        case cmd_jne:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "jne %d\n", elem);
+            break;
+
+        case cmd_jb:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "jb %d\n", elem);
+            break;
+
+        case cmd_jbe:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "jbe %d\n", elem);
+            break;
+
+        case cmd_ja:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "ja %d\n", elem);
+            break;
+
+        case cmd_jae:
+            fscanf (infile, "%d", &elem);
+            fprintf (outfile, "jae %d\n", elem);
+            break;
+
+        case cmd_HLT:
+            fputs ("HLT\n", outfile);
+            break;
+
+        default:
+            printf ("ERROR\n");
+
         }
     }
-    fputs ("HLT\n", outfile);
     fclose (infile);
     fclose (outfile);
 }
