@@ -18,12 +18,12 @@ enum spu {
     cmd_rpush = 17,
     cmd_pop = 24,
     cmd_jmp = 33,
-    cmd_jb = 34, cmd_rjb = 50, // <
-    cmd_jbe = 35, cmd_rjbe = 51, // ≤
-    cmd_ja = 36, cmd_rja = 52, // >
-    cmd_jba = 37, cmd_rjba = 53, // ≥
-    cmd_je = 38, cmd_rje = 54, // ==
-    cmd_jne = 39, cmd_rjne = 55, // ≠
+    cmd_jb = 34, // <
+    cmd_jbe = 35, // ≤
+    cmd_ja = 36, // >
+    cmd_jae = 37, // ≥
+    cmd_je = 38, // ==
+    cmd_jne = 39 // ≠
 };
 
 enum reg {ax = 1, bx = 2, cx = 3, dx = 4};
@@ -35,6 +35,7 @@ struct SPU
     elem_t rbx;
     elem_t rcx;
     elem_t rdx;
+    size_t ip;
 };
 
 void SpuDump (SPU p, char* name, char* file, int numline, const char* func);
