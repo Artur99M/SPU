@@ -49,7 +49,7 @@ int StackPush (stack* p, const elem_t number)
 elem_t StackPop (stack* p, int* ERROR)
 {
     if (ERROR != nullptr) *ERROR = 0;
-    if (p == nullptr)
+    if (p == nullptr && ERROR != nullptr)
     {
         *ERROR += 1;
         return 0;
