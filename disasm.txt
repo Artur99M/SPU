@@ -1,5 +1,5 @@
 push 5
-in
+push 5
 add
 pop ax
 push 48
@@ -10,7 +10,9 @@ push ax
 push ax
 mul
 push bx
-divi
+div
 out
 in
+in
+je 23
 HLT
