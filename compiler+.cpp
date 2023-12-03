@@ -10,15 +10,15 @@ int main()
     int* program;
     ProgramCtor (&program, "asm.txt");
 
-    for (int i = 0; program[i] != cmd_HLT; i++)
+    for (; program[p.ip] != cmd_HLT; p.ip++)
     {
-        int x = program[i];
-        elem_t elem = 0;
-        switch (x)
+        elem_t elem = 0, elem1 = 0, elem2 = 0;
+        int ERROR1 = 0, ERROR2 = 0;
+        switch (program[p.ip])
         {
 
         case cmd_push:
-            elem = program[++i];
+            elem = program[++p.ip];
             StackPush (&(p.stk), elem);
             break;
 
@@ -51,7 +51,7 @@ int main()
             break;
 
         case cmd_rpush:
-            elem = program[++i];
+            elem = program[++p.ip];
 
                 switch (elem)
                 {
@@ -70,8 +70,9 @@ int main()
                 }
 
             break;
+
         case cmd_pop:
-            elem = program[++i];
+            elem = program[++p.ip];
             switch (elem)
             {
                 case ax:
@@ -87,6 +88,134 @@ int main()
                     p.rdx = StackPop (&(p.stk));
                     break;
             }
+            break;
+
+        case cmd_jmp:
+            p.ip = program[p.ip + 1] - 1;
+            break;
+
+        case cmd_jb:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command jb\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 < elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+            }
+            break;
+
+        case cmd_je:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command je\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 == elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+                }
+            }
+            break;
+
+        case cmd_jbe:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command jbe\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 <= elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+            }
+            break;
+
+        case cmd_ja:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command ja\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 > elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+            }
+            break;
+
+        case cmd_jae:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command jae\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 >= elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+            }
+            break;
+
+        case cmd_jne:
+            elem2 = StackPop (&(p.stk), &ERROR2);
+            elem1 = StackPop (&(p.stk), &ERROR1);
+
+            if (ERROR1 != 0 && ERROR2 != 0)
+            {
+                printf ("ERROR in command jne\nip = %lu\n", p.ip);
+                SPU_DUMP (p);
+
+            } else
+            {
+                if (elem1 != elem2)
+                {
+                    p.ip = program[p.ip + 1] - 1;
+                } else
+                {
+                    p.ip++;
+            }
+            break;
+
+        case cmd_HLT:
             break;
 
         default:
