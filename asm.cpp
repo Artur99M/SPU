@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "spu.hpp"
-//HLT = -1, push = 1, add = 2, sub = 3, mul = 4, divi = 5, out = 6, in = 7,
 
 int main ()
 {
     FILE* infile = fopen ("proga.txt", "r");
     FILE* outfile = fopen ("asm.txt", "w");
 
-    forever
+    for (size_t line = 0;; line++)
     {
         char s[12] = "";
         fscanf (infile, "%s", s);
@@ -29,7 +28,7 @@ int main ()
         {
             fprintf (outfile, "%d\n", cmd_mul);
 
-        } else if (strcmp (s, "divi") == 0)
+        } else if (strcmp (s, "div") == 0)
         {
             fprintf (outfile, "%d\n", cmd_div);
 
@@ -94,8 +93,54 @@ int main ()
                 fprintf (outfile, "ERROR\n");
                 break;
             }
+
+        } else if (strcmp (s, "jmp") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_jmp, newip);
+
+        } else if (strcmp (s, "jb") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_jb, newip);
+
+        } else if (strcmp (s, "jbe") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_jbe, newip);
+
+        } else if (strcmp (s, "ja") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_ja, newip);
+
+        } else if (strcmp (s, "jae") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_jae, newip);
+
+        } else if (strcmp (s, "je") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_je, newip);
+
+        } else if (strcmp (s, "jne") == 0)
+        {
+            int newip = 0;
+            fscanf (infile, "%d", &newip);
+            fprintf (outfile, "%d %d\n", cmd_jne, newip);
+
         } else
         {
+            if (getc (infile) != EOF)
+                printf ("ERROR on line %lu\n", line);
+
             break;
         }
     }
