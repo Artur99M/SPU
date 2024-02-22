@@ -1,134 +1,77 @@
 #include <stdio.h>
-#include "spu.hpp"
+#include "spu.h"
+#include <sys/stat.h>
 
 
 int main ()
 {
-    FILE* infile = fopen ("asm.txt", "r");
-    FILE* outfile  = fopen ("disasm.txt", "w");
+    FILE* infile  = fopen ("asm.txt", "r");
+    FILE* outfile = fopen ("disasm.txt", "w");
+    FILE* logfile = fopen ("disasm.log", "w");
 
-    int x = 0;
+    struct stat buff;
+    stat ("asm.txt", &buff);
+    size_t size_infile = buff.st_size;
 
-    while (x != cmd_HLT)
+    int end = 0, x = 0, elem = 0;
+
+    for (size_t line = 1; end == 0; line++)
     {
-        fscanf (infile, "%d", &x);
-        elem_t elem = 0;
-        switch (x)
+        if (fscanf (infile, "%d", &x) == 0 || ftell(infile) == size_infile)
+            if (ftell(infile) == size_infile) end = 1;
+            else
+            {
+                fprintf (logfile, "disasm error on line %lu\n", line);
+                end = 1;
+            }
+
+        else
         {
-
-        case cmd_push:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "push %d\n", elem);
-            break;
-
-        case cmd_add:
-            fputs ("add\n", outfile);
-            break;
-
-        case cmd_sub:
-            fputs ("sub\n", outfile);
-            break;
-
-        case cmd_mul:
-            fputs ("mul\n", outfile);
-            break;
-
-        case cmd_div:
-            fputs ("div\n", outfile);
-            break;
-
-        case cmd_in:
-            fputs ("in\n", outfile);
-            break;
-
-        case cmd_out:
-            fputs ("out\n", outfile);
-            break;
-
-        case cmd_rpush:
-            fscanf (infile, "%d", &elem);
-            fputs ("push ", outfile);
-            switch (elem)
+            elem_t elem = 0;
+            for (int i = 0; i < 20; i++)
             {
-                case ax:
-                    fputs ("ax\n", outfile);
-                    break;
-                case bx:
-                    fputs ("bx\n", outfile);
-                    break;
-                case cx:
-                    fputs ("cx\n", outfile);
-                    break;
-                case dx:
-                    fputs ("dx\n", outfile);
-                    break;
+
+                if (x == (int) spaceSPU::cmds[i])
+                {
+                    if (i < 7 || i == 18)
+                    {
+                        fprintf (outfile, "%s\n", spaceSPU::commands[i]);
+                        break;
+                    }
+                    else if (i == 7 || (9 < i && i < 18))
+                    {
+                        if (fscanf (infile, "%d", &elem) == 0)
+                        {
+                            fprintf (logfile, "disasm error on line %lu\n", line);
+                            end = 1;
+                        }
+                        else
+                            fprintf (outfile, "%s %d\n", spaceSPU::commands[i], elem);
+                        break;
+                    }
+                    else if (i == 8 || i == 9)
+                    {
+                        if (fscanf (infile, "%d", &elem) == 0)
+                        {
+                            fprintf (logfile, "disasm error on line %lu\n", line);
+                            end = 1;
+                        }
+                        else
+                            fprintf (outfile, "%s %s\n", spaceSPU::commands[i], spaceSPU::registers[elem]);
+                        break;
+                    }
+                    else
+                    {
+                        fprintf (logfile, "disasm error on line %lu\n", line);
+                        end = 1;
+                        break;
+                    }
+                }
             }
-            break;
-
-        case cmd_pop:
-            fscanf (infile, "%d", &elem);
-            fputs ("pop ", outfile);
-            switch (elem)
-            {
-                case ax:
-                    fputs ("ax\n", outfile);
-                    break;
-                case bx:
-                    fputs ("bx\n", outfile);
-                    break;
-                case cx:
-                    fputs ("cx\n", outfile);
-                    break;
-                case dx:
-                    fputs ("dx\n", outfile);
-                    break;
-            }
-            break;
-
-        case cmd_jmp:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "jmp %d\n", elem);
-            break;
-
-        case cmd_je:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "je %d\n", elem);
-            break;
-
-        case cmd_jne:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "jne %d\n", elem);
-            break;
-
-        case cmd_jb:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "jb %d\n", elem);
-            break;
-
-        case cmd_jbe:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "jbe %d\n", elem);
-            break;
-
-        case cmd_ja:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "ja %d\n", elem);
-            break;
-
-        case cmd_jae:
-            fscanf (infile, "%d", &elem);
-            fprintf (outfile, "jae %d\n", elem);
-            break;
-
-        case cmd_HLT:
-            fputs ("HLT\n", outfile);
-            break;
-
-        default:
-            printf ("ERROR\n");
-
         }
     }
+
+    fclose (logfile);
     fclose (infile);
     fclose (outfile);
 }
