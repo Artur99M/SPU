@@ -1,149 +1,159 @@
 #include <stdio.h>
 #include <string.h>
-#include "spu.hpp"
+#include "spu.h"
+#include <stdlib.h>
+
+
+int push_asm (FILE* infile, FILE* outfile);
+int pop_asm (FILE* infile, FILE* outfile);
 
 int main ()
 {
     FILE* infile = fopen ("proga.txt", "r");
     FILE* outfile = fopen ("asm.txt", "w");
-
-    for (size_t line = 0;; line++)
+    FILE* logfile = fopen ("asm.log", "w");
+    int end = 0;
+    for (size_t line = 1, ip = 0; end == 0; line++, ip++)
     {
         char s[12] = "";
         fscanf (infile, "%s", s);
-
-        if (strcmp (s, "HLT") == 0)
+        for (int i = 0; i < 21; i++)
         {
-            fprintf (outfile, "%d", cmd_HLT);
-
-        } else if (strcmp (s, "add") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_add);
-
-        } else if (strcmp (s, "sub") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_sub);
-
-        } else if (strcmp (s, "mul") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_mul);
-
-        } else if (strcmp (s, "div") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_div);
-
-        } else if (strcmp (s, "in") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_in);
-
-        } else if (strcmp (s, "out") == 0)
-        {
-            fprintf (outfile, "%d\n", cmd_out);
-
-        } else if (strcmp (s, "push") == 0)
-        {
-            int x = 0;
-
-            if (fscanf (infile, "%d", &x) == 1)
+            if (i == 20)
             {
-                fprintf (outfile, "%d %d\n", cmd_push, x);
-
-            } else
-            {
-                char y[5] = "";
-                fscanf (infile, "%s", y);
-                if (strcmp (y, "ax") == 0)
-                {
-                    fprintf (outfile, "%d %d\n", cmd_rpush, ax);
-                } else if (strcmp (y, "bx") == 0)
-                {
-                    fprintf (outfile, "%d %d\n", cmd_rpush, bx);
-                } else if (strcmp (y, "cx") == 0)
-                {
-                    fprintf (outfile, "%d %d\n", cmd_rpush, cx);
-                } else if (strcmp (y, "dx") == 0)
-                {
-                    fprintf (outfile, "%d %d\n", cmd_rpush, dx);
-                } else
-                {
-                    fprintf (outfile, "ERROR\n");
-                    break;
-                }
-
-            }
-
-        } else if (strcmp (s, "pop") == 0)
-        {
-            char x[5] = "";
-            fscanf (infile, "%s", x);
-            if (strcmp (x, "ax") == 0)
-            {
-                fprintf (outfile, "%d %d\n", cmd_pop, ax);
-            } else if (strcmp (x, "bx") == 0)
-            {
-                fprintf (outfile, "%d %d\n", cmd_pop, bx);
-            } else if (strcmp (x, "cx") == 0)
-            {
-                fprintf (outfile, "%d %d\n", cmd_pop, cx);
-            } else if (strcmp (x, "dx") == 0)
-            {
-                fprintf (outfile, "%d %d\n", cmd_pop, dx);
-            } else
-            {
-                fprintf (outfile, "ERROR\n");
+                if (getc (infile) != EOF)
+                    fprintf (logfile, "asm: ERROR on line %lu\n", line);
+                end = 1;
                 break;
             }
 
-        } else if (strcmp (s, "jmp") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_jmp, newip);
-
-        } else if (strcmp (s, "jb") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_jb, newip);
-
-        } else if (strcmp (s, "jbe") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_jbe, newip);
-
-        } else if (strcmp (s, "ja") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_ja, newip);
-
-        } else if (strcmp (s, "jae") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_jae, newip);
-
-        } else if (strcmp (s, "je") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_je, newip);
-
-        } else if (strcmp (s, "jne") == 0)
-        {
-            int newip = 0;
-            fscanf (infile, "%d", &newip);
-            fprintf (outfile, "%d %d\n", cmd_jne, newip);
-
-        } else
-        {
-            if (getc (infile) != EOF)
-                printf ("ERROR on line %lu\n", line);
-
-            break;
+            if (strcmp (spaceSPU::commands[i], s) == 0)
+            {
+                if (i < 7 || i == 18)
+                {
+                    fprintf (outfile, "%d\n", spaceSPU::cmds[i]);
+                    break;
+                }
+                else if (i == 7)
+                {
+                    if ((end = push_asm (infile, outfile)) == 1)
+                        fprintf (logfile, "PUSH ERROR (wrong reg) on line %lu!\n", line);
+                    ip++;
+                    break;
+                }
+                else if (i == 9)
+                {
+                    if ((end = pop_asm (infile, outfile)) == 1)
+                        fprintf (logfile, "POP ERROR (wrong reg) on line %lu!\n", line);
+                    ip++;
+                    break;
+                }
+                else if (9 < i && i < 17)
+                {
+                    int newip = 0;
+                    if (fscanf (infile, "%d", &newip) == 0)
+                    {
+                        fprintf (logfile, "asm: JUMP ERROR on line %lu!\n", line);
+                        end = 1;
+                    }
+                    else
+                    {
+                        fprintf (outfile, "%d %d\n", spaceSPU::cmds[i], newip);
+                    }
+                    ip++;
+                    break;
+                }
+                else if (i == 19)
+                {
+                    size_t pointer = 0;
+                    if (fscanf (infile, "%lu", &pointer) == 0 || pointer < 0)
+                    {
+                        fprintf (logfile, "asm: ORG ERROR on line %lu!\n", line);
+                        end = 1;
+                    }
+                    else
+                    {
+                        for (;ip < pointer; ip++)
+                            fprintf (outfile, "%d\n", cmd_HLT);
+                    }
+                    break;
+                }
+                else if (i == 17)
+                {
+                    size_t pointer = 0;
+                    if (fscanf (infile, "%lu", &pointer) == 0 || pointer < 0)
+                    {
+                        fprintf (logfile, "asm: CALL ERROR on line %lu!\n", line);
+                        end = 1;
+                    }
+                    else
+                    {
+                        fprintf (outfile, "%d %lu\n", cmd_call, pointer);
+                    }
+                    ip++;
+                    break;
+                }
+                else
+                {
+                    fprintf (logfile, "asm: ERROR on line %lu!\n", line);
+                    end = 1;
+                    break;
+                }
+            }
         }
     }
+    fclose (logfile);
     fclose (outfile);
     fclose (infile);
 }
+
+
+int push_asm (FILE* infile, FILE* outfile)
+{
+    int x = 0;
+
+    if (fscanf (infile, "%d", &x) == 1)
+    {
+        fprintf (outfile, "%d %d\n", cmd_push, x);
+
+    } else
+    {
+        char y[5] = "";
+        fscanf (infile, "%s", y);
+        for (int j = 0; j < 5; j++)
+        {
+            if (j == 5)
+            {
+                return 1;
+                break;
+            }
+            else if (strcmp(spaceSPU::registers[j], y) == 0)
+            {
+                fprintf (outfile, "%d %d\n", cmd_rpush, j);
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+int pop_asm (FILE* infile, FILE* outfile)
+{
+    char x[5] = "";
+    fscanf (infile, "%s", x);
+    for (int j = 0; j < 5; j++)
+    {
+        if (j == 5)
+        {
+            return 1;
+            break;
+        }
+        else if (strcmp(spaceSPU::registers[j], x) == 0)
+        {
+            fprintf (outfile, "%d %d\n", cmd_pop, j);
+            break;
+        }
+    }
+    return 0;
+}
+
