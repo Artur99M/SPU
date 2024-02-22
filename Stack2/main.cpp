@@ -4,18 +4,37 @@
 
 int main ()
 {
-    stack p;
-    StackCtor (&p, 5);
-
-    for (int i = 0; i < 100; i++)
-        printf ("%d %d\n", i, StackPush (&p, i));
-    putchar ('\n');
-    int q = 0;
-    for (int i = 0; i < 60; i++)
-        printf ("%d %d\n", StackPop (&p, &q), q);
-
-
-    STACK_DUMP (p);
-    StackDtor (&p);
+    stack stk;
+    STACK_ERROR err;
+    if ((err = StackCtor (&stk, 8)) != STACK_NO_ERROR)
+    {
+        printf ("%d\n", (int) err);
+        STACK_DUMP (&stk);
+    }
+    elem_t p = 8;
+    for (; p < 20; p++)
+    {
+        puts ("bark");
+        if ((err = StackPush (&stk, &p)) != STACK_NO_ERROR)
+        {
+            printf ("8 %d\n", (int) err);
+            STACK_DUMP (&stk);
+        }
+    }
+    STACK_DUMP (&stk);
+    for (int i = 0; i < 7; i++)
+    {
+        if ((err = StackPop (&stk)) != STACK_NO_ERROR)
+        {
+            printf ("%d\n", (int) err);
+            STACK_DUMP (&stk);
+        }
+    }
+    STACK_DUMP (&stk);
+    if ((err = StackDtor (&stk)) != STACK_NO_ERROR)
+    {
+        printf ("%d\n", (int) err);
+        STACK_DUMP (&stk);
+    }
 }
 
