@@ -1,18 +1,111 @@
-push 5
-push 5
-add
-pop ax
-push 48
-push 43
-sub
-pop bx
-push ax
-push ax
-mul
-push bx
-div
+push 1
+in
+call 100
 out
-in
-in
-je 23
 HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+HLT
+pop ax
+push ax
+push 1
+je 118
+push ax
+push ax
+push 1
+sub
+call 100
+mul
+ret
+push 1
+ret
