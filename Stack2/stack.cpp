@@ -1,9 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
-#include "stack.hpp"
+#include "stack.h"
 #include "stack_protection.h"
 
-static const int changesize = 2;
+const size_t start_capacity = 8;
+
 
 int isFull (stack* p){
     assert (p != nullptr);
@@ -11,113 +12,151 @@ int isFull (stack* p){
 }
 
 int isEmpty (stack* p) {
-    assert(p != nullptr);
+    assert (p != nullptr);
     return p->size == 0;
 }
 
-int StackPush (stack* p, const elem_t number)
+STACK_ERROR StackPush (stack* p, const elem_t* number)
 {
+    STACK_ERROR answer = STACK_NO_ERROR;
+    if ((answer = StackVerifi(p)) != STACK_NO_ERROR)
+        return answer;
 
-    if (p == nullptr)
-        return 1;
-    if (p->data == nullptr)
-        return 2;
+    if ((answer = IsAliveCanary (p)) != STACK_NO_ERROR) return answer;
 
 
     if (isFull (p))
     {
-        p->capacity *= changesize;
-        elem_t* data = (elem_t*) calloc (p->capacity * changesize, sizeof (elem_t));
-
-        if (data == nullptr)
-            return 8;
-
-        for (size_t i = 0; i < p->capacity; i++)
-            data[i] = p->data[i];
-
-        p->capacity *= changesize;
-        free (p->data);
-        p->data = data;
+        if ((answer = DataReCtorPush (p)) != STACK_NO_ERROR) return answer;
     }
 
-    p->data[p->size] = number;
+    p->data[p->size] = *number;
     p->size++;
 
-    return 0;
+    return STACK_NO_ERROR;
 }
 
-elem_t StackPop (stack* p, int* ERROR)
+STACK_ERROR StackPop (stack* p, elem_t* pointer_for_elem)
 {
-    if (ERROR != nullptr) *ERROR = 0;
-    if (p == nullptr && ERROR != nullptr)
-    {
-        *ERROR += 1;
-        return 0;
-    }
-    /*if (IsAliveCanary (p, sizeof (stack)) != 0)
-    {
-        *ERROR += 2;
-        return 0;
-    }*/
+    STACK_ERROR answer = STACK_NO_ERROR;
+    if ((answer = StackVerifi(p)) != STACK_NO_ERROR)
+        return answer;
 
-    elem_t answer = 0;
+    if ((answer = IsAliveCanary (p)) != STACK_NO_ERROR)
+        return answer;
 
     if (isEmpty (p))
-    {
-        if (ERROR != nullptr) *ERROR += 4;
-        return 0;
-    }
+        return STACK_EMPTY;
 
     p->size--;
-    answer = p->data[p->size];
+    if (pointer_for_elem != nullptr) *pointer_for_elem = p->data[p->size];
     p->data[p->size] = NULL;
 
 
-    if (p->size < p->capacity / changesize && p->capacity > 4)
-    {
-        p->capacity /= changesize;
-        elem_t* data = nullptr;
-
-        if ((data = (elem_t*) calloc (p->capacity, sizeof(elem_t))) == nullptr) {
-            if (ERROR != nullptr) *ERROR += 8;
-            return 0;
-        }
-
-        for (size_t i = 0; i < p->size; i++)
-            data[i] = p->data[i];
-        free(p->data);
-        p->data = data;
-}
-
-    /*if (IsAliveCanary (p, sizeof (stack)) != 0)
-    {
-        *ERROR += 16;
-        return 0;
-    }*/
+    if (p->size < p->capacity / changesize && p->capacity > start_capacity)
+        answer = DataReCtorPop (p);
 
     return answer;
 }
 
-int StackCtor (stack* p, const size_t capacity)
+STACK_ERROR StackPop (stack* p)
 {
+    STACK_ERROR answer = STACK_NO_ERROR;
+    if ((answer = StackVerifi(p)) != STACK_NO_ERROR)
+        return answer;
+
+    if ((answer = IsAliveCanary (p)) != STACK_NO_ERROR)
+        return answer;
+
+    if (isEmpty (p))
+        return STACK_EMPTY;
+
+    p->size--;
+    p->data[p->size] = NULL;
+
+
+    if (p->size < p->capacity / changesize && p->capacity > start_capacity)
+        answer = DataReCtorPop (p);
+
+    return answer;
+}
+
+STACK_ERROR StackCtor (stack* p, size_t capacity)// оно отказывается смотреть на значение по умолчанию
+{                                                                // поэтому со значением по умолчанию во всех функциях беда
+    STACK_ERROR answer = STACK_NO_ERROR;
     if (p == nullptr)
-        return 1;
+        return STACK_NULLPTR;
+    if (capacity == 0) capacity = start_capacity;
 
     p->capacity = capacity;
     p->size = 0;
-    if ((p->data = (elem_t*) calloc (capacity, sizeof(elem_t))) == nullptr) return 2;
+    if ((answer = CanaryCtor (p)) != 0) return answer;
+    if ((answer = DataCtor (p)) != 0) return answer;
 
-    return 0;
+    return STACK_NO_ERROR;
 }
 
-int StackDtor (stack* p)
+STACK_ERROR StackCtor (stack* p)// оно отказывается смотреть на значение по умолчанию
+{                              // поэтому со значением по умолчанию во всех функциях беда
+    STACK_ERROR answer = STACK_NO_ERROR;
+    if (p == nullptr)
+        return STACK_NULLPTR;
+
+    p->capacity = start_capacity;
+    p->size = 0;
+    if ((answer = CanaryCtor (p)) != 0) return answer;
+    if ((answer = DataCtor (p)) != 0) return answer;
+
+    return STACK_NO_ERROR;
+}
+
+STACK_ERROR StackDtor (stack* p)
 {
     if (p == nullptr)
-        return 1;
+        return STACK_NULLPTR;
 
-    free (p->data);
+    free ((canary_t*)p->data - 1);
     p->capacity = 0;
     p->size = 0;
     p->data = nullptr;
-    return 0;
+    return STACK_NO_ERROR;
 }
+
+
+// elem_t StackPop (stack* p)
+// {
+//     if (p == nullptr)
+//         return 0;
+//     if (IsAliveCanary (p) != 0)
+//         return 0;
+//
+//     elem_t value = 0;
+//
+//     if (isEmpty (p))
+//         return 0;
+//
+//     p->size--;
+//     value = p->data[p->size];
+//     p->data[p->size] = NULL;
+//
+//
+//     if (p->size < p->capacity / changesize && p->capacity > start_capacity)
+//     {
+//         DataReCtorPop (p);
+//     }
+//
+//     return value;
+// }
+
+// int StackCtor (stack* p)
+// {
+//     if (p == nullptr)
+//         return 1;
+//
+//     p->capacity = start_capacity;
+//     p->size = 0;
+//     if (CanaryCtor (p) != 0) return 2;
+//     if (DataCtor (p) != 0) return 4;
+//
+//     return 0;
+// }
