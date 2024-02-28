@@ -7,12 +7,6 @@
 
 static const canary_t SPU_canary = time(NULL) * sin(time(NULL));
 
-namespace spaceSPU
-{
-    const char* commands[] = {"HLT", "add", "sub", "mul", "div", "in", "out", "push", "pop", "jmp", "jb", "jbe", "ja", "jae", "je", "jne", "call", "ret", "org"};
-    const spu cmds [] = {cmd_HLT, cmd_add, cmd_sub, cmd_mul, cmd_div, cmd_in, cmd_out, cmd_push, cmd_pop, cmd_jmp, cmd_jb, cmd_jbe, cmd_ja, cmd_jae, cmd_je, cmd_jne, cmd_call, cmd_ret, org};
-    const char* registers[] = {"ax", "bx", "cx", "dx"};
-}
 
 SPU_ERROR SpuCtor (SPU* p)
 {
@@ -45,8 +39,8 @@ SPU_ERROR SpuDtor (SPU* p)
 
     p->ip = 0;
 
-    if (StackDtor (&(p->stk)) != STACK_NO_ERROR) return STACK_DTOR_ERROR;
-    if (StackDtor (&(p->stk_ip)) != STACK_NO_ERROR) return STACK_IP_DTOR_ERROR;
+    StackDtor (&(p->stk));
+    StackDtor (&(p->stk_ip));
 
     return SPU_NO_ERROR;
 }
@@ -138,3 +132,4 @@ SPU_ERROR ProgramCtor (int** program, char* infile_name)
 
     return SPU_NO_ERROR;
 }
+

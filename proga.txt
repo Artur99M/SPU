@@ -3,6 +3,7 @@ in
 call 100
 out
 HLT
+string:
 org 100
 pop ax
 push ax
@@ -14,6 +15,13 @@ push 1
 sub
 call 100
 mul
-ret
+ret;jewfdwkjedfnk
 push 1
 ret
+wudhf:
+welkjfd:
+ioefw:
+ewk:;cewokckekcko,lkemc
+;lw,efdl;w,ew;l,cd
+wedgyu:
+ejfd:
