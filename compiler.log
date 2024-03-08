@@ -1,0 +1,164 @@
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+
+>>> SPU_DUMP() has been started
+SPU "p" from file "compiler.cpp", func "main" on 42 line
+    p
+{
+>>> rax = 0
+>>> rbx = 0
+>>> rcx = 0
+>>> rdx = 0
+
+>>> STACK
+    p.stk.capacity = 8
+    p.stk.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+>>> STACK_IP
+    p.stk_ip.capacity = 8
+    p.stk_ip.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+   }
+}
+>>> SPU_DUMP() has been finished
+
+
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+
+>>> SPU_DUMP() has been started
+SPU "p" from file "compiler.cpp", func "main" on 42 line
+    p
+{
+>>> rax = 0
+>>> rbx = 0
+>>> rcx = 0
+>>> rdx = 0
+
+>>> STACK
+    p.stk.capacity = 8
+    p.stk.size = 1
+   {
+       10
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+>>> STACK_IP
+    p.stk_ip.capacity = 8
+    p.stk_ip.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+   }
+}
+>>> SPU_DUMP() has been finished
+
+
+0 0 0 0 0 0 0 0 0 0 10 0 0 0 0 
+
+
+>>> SPU_DUMP() has been started
+SPU "p" from file "compiler.cpp", func "main" on 42 line
+    p
+{
+>>> rax = 0
+>>> rbx = 0
+>>> rcx = 0
+>>> rdx = 0
+
+>>> STACK
+    p.stk.capacity = 8
+    p.stk.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+>>> STACK_IP
+    p.stk_ip.capacity = 8
+    p.stk_ip.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+   }
+}
+>>> SPU_DUMP() has been finished
+
+
+0 0 0 0 0 0 0 0 0 0 10 0 0 0 0 
+
+
+>>> SPU_DUMP() has been started
+SPU "p" from file "compiler.cpp", func "main" on 42 line
+    p
+{
+>>> rax = 0
+>>> rbx = 0
+>>> rcx = 0
+>>> rdx = 0
+
+>>> STACK
+    p.stk.capacity = 8
+    p.stk.size = 1
+   {
+       10
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+>>> STACK_IP
+    p.stk_ip.capacity = 8
+    p.stk_ip.size = 0
+   {
+>>>    0    <<<
+       0
+       0
+       0
+       0
+       0
+       0
+       0
+   }
+}
+>>> SPU_DUMP() has been finished
+
+

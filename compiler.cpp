@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define command_mask(x) 0x001F&x
-#define memory_mask(x) (x >> 13)&0x0007
+#define memory_mask(x) (x >> 9)&0x0007
 #define RAM 4
 #define REGISTER 2
 #define NUMBER 1
@@ -32,11 +32,14 @@ int main()
         fputs ("RAM HAS SIZE 0\n", logfile);
         abort();
     }
-
     elem_t elem = 0, elem1 = 0, elem2 = 0;
     reg regist = ax;
     for (; program[p.ip] != cmd_HLT; p.ip++)
     {
+        for (size_t qwerty = 0; qwerty < 15; qwerty++)
+            fprintf (logfile, "%d ", ram[qwerty]);
+        putc ('\n', logfile);
+        SPU_DUMP (p, logfile);
         if (IsAliveSPUCanary (&p) != SPU_NO_ERROR)
         {
             fputs ("Canary died!\n", logfile);
@@ -44,16 +47,9 @@ int main()
         }
         switch (command_mask (program[p.ip]))
         {
-
             case cmd_push:
                 elem = program[p.ip + 1];
-                if ((err_stk = StackPush (&(p.stk), &elem)) != STACK_NO_ERROR)
-                {
-                    fprintf (logfile, "PUSH ERROR = %d\n", err_stk);
-                    SPU_DUMP (p, logfile);
-                    abort();
-                }
-                if (memory_mask(program[p.ip]) == REGISTER)
+                if ((memory_mask(program[p.ip])) == REGISTER)
                     switch (elem)
                     {
                         case ax:
@@ -69,10 +65,11 @@ int main()
                             StackPush (&(p.stk), &(p.rdx));
                             break;
                     }
-                else if (memory_mask(program[p.ip]) == NUMBER)
+                else if ((memory_mask(program[p.ip])) == NUMBER)
                     StackPush (&(p.stk), &elem);
 
-                //else if (memory_mask (program[p.ip]) == RAM)
+                else if ((memory_mask (program[p.ip])) == RAM)
+                    StackPush (&p.stk, ram + program[p.ip + 1]);
 
                 else
                 {
@@ -197,7 +194,7 @@ int main()
                 break;
 
             case cmd_pop:
-                if (memory_mask(program[p.ip]) == REGISTER)
+                if ((memory_mask(program[p.ip])) == REGISTER)
                     switch (program[p.ip + 1])
                     {
                         case ax:
@@ -213,7 +210,8 @@ int main()
                             StackPop (&(p.stk), &(p.rdx));
                             break;
                     }
-                //else if (memory_mask (program[p.ip]) == RAM)
+                else if ((memory_mask (program[p.ip])) == RAM)
+                    StackPop (&(p.stk), ram + program[p.ip + 1]);
                 else
                 {
                     fputs ("POP ERROR\n", logfile);
@@ -370,6 +368,8 @@ int main()
 
         }
     }
+    free (ram);
+    free (program);
     fclose (logfile);
     SpuDtor (&p);
 }

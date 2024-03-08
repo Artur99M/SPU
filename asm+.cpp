@@ -139,7 +139,7 @@ SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
         long start_ftell = ftell (infile);
         int elem = 0;
         if (fscanf (infile, "%d", &elem) == 1)
-            fprintf (outfile, "%d %d\n", 0x2000|cmd_push, elem);
+            fprintf (outfile, "%d %d\n", 0x200|cmd_push, elem);
         else
         {
             if (fseek (infile, start_ftell, SEEK_SET) != 0)
@@ -153,7 +153,7 @@ SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
             for (; i < 4; i++)
                 if (strcmp (registers[i].str, text) == 0)
                 {
-                    fprintf (outfile, "%d %d\n", 0x4000|cmd_push, registers[i].value);
+                    fprintf (outfile, "%d %d\n", 0x400|cmd_push, registers[i].value);
                     i--;
                     break;
                 }
@@ -170,7 +170,7 @@ SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
                 {
                     if (fscanf (infile, "%d", &elem) == 1)
                     {
-                        fprintf (outfile, "%d %d\n", 0x8000|cmd_push, elem);
+                        fprintf (outfile, "%d %d\n", 0x800|cmd_push, elem);
                         while ((c = getc (infile)) != '\n' && c != ' ');
                     }
                     else
@@ -192,7 +192,7 @@ SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
         for (; i < 4; i++)
             if (strcmp (registers[i].str, text) == 0)
             {
-                fprintf (outfile, "%d %d\n", 0x4000|cmd_pop, registers[i].value);
+                fprintf (outfile, "%d %d\n", 0x400|cmd_pop, registers[i].value);
                 i--;
                 break;
             }
@@ -209,7 +209,7 @@ SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
             {
                 if (fscanf (infile, "%d", &elem) == 1)
                 {
-                    fprintf (outfile, "%d %d\n", 0x8000|cmd_pop, elem);
+                    fprintf (outfile, "%d %d\n", 0x800|cmd_pop, elem);
                     while ((c = getc (infile)) != '\n' && c != ' ');
                 }
                 else

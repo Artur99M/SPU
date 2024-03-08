@@ -1,4 +1,5 @@
-push ax
-push [14]
-push 14
+push 10
+pop [10]
+push [10] ;cwncjk
+out
 HLT

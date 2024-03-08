@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define command_mask(x) 0x001F&x
-#define memory_mask(x) (x >> 13)&0x0007
+#define memory_mask(x) (x >> 9)&0x007
 #define RAM 4
 #define REGISTER 2
 #define NUMBER 1
@@ -38,7 +38,6 @@ int main()
             fputs ("Canary died!\n", logfile);
             SPU_DUMP (p, logfile);
         }
-        printf ("%d ", command_mask (program[p.ip]));
         switch (command_mask (program[p.ip]))
         {
             case cmd_push:
