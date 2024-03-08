@@ -8,7 +8,7 @@
 #define RAM 4
 #define REGISTER 2
 #define NUMBER 1
-#define RAM_SIZE 10737418240 // = 10 * 2^30
+#define RAM_SIZE 30000 // < 2 ^ 15
 
 int main()
 {

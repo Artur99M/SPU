@@ -1,8 +1,8 @@
 #ifndef SPU_H
 #define SPU_H
 
-#include "Stack2/stack.h"
-#include "Stack2/stack_protection.h"
+#include "Stack/stack.h"
+#include "Stack/stack_protection.h"
 #define SPU_DUMP(p, file) SpuDump (p, #p, __FILE__, __LINE__, __func__, file)
 
 enum spu {

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "spu.h"
-#include "Onegin/header/readtext.h"
-#include "Onegin/header/outtext.h"
+#include "Onegin_lib/header/readtext.h"
+#include "Onegin_lib/header/outtext.h"
 
 struct marker
 {
