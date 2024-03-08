@@ -1,159 +1,264 @@
 #include <stdio.h>
 #include <string.h>
-#include "spu.h"
+#include <stdbool.h>
+#include <ctype.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include "spu.h"
+#include "Onegin/header/readtext.h"
+#include "Onegin/header/outtext.h"
 
+struct marker
+{
+    char str[32];
+    size_t value;
+};
 
-int push_asm (FILE* infile, FILE* outfile);
-int pop_asm (FILE* infile, FILE* outfile);
+SPU_ERROR command_init (spu* command, marker* markers, char* str_command);
+SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command);
+SPU_ERROR asm_jmp     (spu* command, marker* markers, FILE* infile, FILE* outfile, FILE* logfile,
+size_t size_markers);
+bool isstrdigit (char* str);
 
 int main ()
 {
-    FILE* infile = fopen ("proga.txt", "r");
-    FILE* outfile = fopen ("asm.txt", "w");
     FILE* logfile = fopen ("asm.log", "w");
-    int end = 0;
-    for (size_t line = 1, ip = 0; end == 0; line++, ip++)
+
+    text txt;
+    readtext (&txt, "proga.txt");
+    for (size_t i = 0; i < txt.sizetext; i++)
     {
-        char s[12] = "";
+        if (txt.alltext[i] == ';')
+            for (; i < txt.sizetext && txt.alltext[i] != '\0'; i++)
+                txt.alltext[i] = '\0';
+    }
+    outSRC (&txt, "asm+.txt");
+    FILE* infile  = fopen ("asm+.txt", "r");
+    FILE* outfile = fopen ("asm.txt" , "w");
+    struct stat buff;
+    stat("asm+.txt", &buff);
+    size_t size_asm = (size_t) buff.st_size;
+
+    marker* markers = (marker*) calloc (4, sizeof (marker));
+    if (markers == nullptr)
+    {
+        fputs ("Array for markers wasn't made\n", logfile);
+        abort();
+    }
+    size_t size_markers = 0,
+       capacity_markers = 4;
+
+
+    for (size_t ip = 0; ftell(infile) < size_asm; ip++)
+    {
+        char s[256] = "";
         fscanf (infile, "%s", s);
-        for (int i = 0; i < 21; i++)
+
+        short i = 0;
+        for (; i < 19; i++)
         {
-            if (i == 20)
+            if (strcmp (cmds[i].str, s) == 0)
+                break;
+        }
+        for (short j; j < 4; j++)
+        {
+            if (strcmp (registers[j].str, s) == 0)
+                i = j;
+        }
+        if (i == 19 && !isstrdigit(s))
+        {
+            strcpy (markers[size_markers].str, s);
+            markers[size_markers].value = (ip--);
+            size_markers++;
+        }
+
+        if (size_markers >= capacity_markers)
+            if ((markers = (marker*) realloc (markers,
+            (capacity_markers *= 2) * sizeof (marker))) == nullptr)
             {
-                if (getc (infile) != EOF)
-                    fprintf (logfile, "asm: ERROR on line %lu\n", line);
-                end = 1;
+                fputs ("ERROR: markers ERROR", logfile);
+                abort();
+            }
+    }
+
+
+    if (fseek (infile, 0, SEEK_SET) != 0)
+    {
+        fputs ("ERROR when markers were read\n", logfile);
+        abort();
+    }
+
+    for (size_t line = 0; ftell(infile) != size_asm; line++)
+    {
+        spu command = cmd_HLT;
+        char str_command[32] = "";
+        fscanf (infile, "%s", str_command);
+        if (command_init (&command, markers, str_command) == SPU_NO_ERROR)
+            if ((int) command < 9 || command == cmd_ret)
+                asm_commads (logfile, infile, outfile, command);
+            if (command == dir_org)
+            {
+                size_t q = 0;
+                if (fscanf (infile, "%lu", &q) == 0)
+                {
+                    fputs ("ORG ERROR\n", logfile);
+                    abort();
+                }
+                for (; q > 0; q--)
+                    fprintf (outfile, "%d\n", cmd_HLT);
+            }
+            if (9 <= (int) command && (int) command < 17)
+                asm_jmp (&command, markers, infile, outfile, logfile, size_markers);
+
+    }
+
+    fclose (outfile);
+    fclose (infile);
+    fclose (logfile);
+}
+
+SPU_ERROR command_init (spu* command, marker* markers, char* str_command)
+{
+    if (command == nullptr) return SPU_NO_COMMAND_ERROR;
+
+    int i = 0;
+    for (; i < 19 && strcmp (cmds[i].str, str_command); i++);
+
+    if (i == 19) return SPU_MARKER;
+    *command = cmds[i].cmd;
+
+    return SPU_NO_ERROR;
+}
+SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
+{
+    if ((int) command < 7 || command == cmd_ret)
+        fprintf (outfile, "%d\n", command);
+
+    else if (command == cmd_push)
+    {
+        long start_ftell = ftell (infile);
+        int elem = 0;
+        if (fscanf (infile, "%d", &elem) == 1)
+            fprintf (outfile, "%d %d\n", 0x200|cmd_push, elem);
+        else
+        {
+            if (fseek (infile, start_ftell, SEEK_SET) != 0)
+            {
+                fputs ("ERROR: fseek in push ERROR\n", logfile);
+                abort();
+            }
+            char text[12] = "";
+            fscanf (infile, "%s", text);
+            int i = 0;
+            for (; i < 4; i++)
+                if (strcmp (registers[i].str, text) == 0)
+                {
+                    fprintf (outfile, "%d %d\n", 0x400|cmd_push, registers[i].value);
+                    i--;
+                    break;
+                }
+            if (i == 4)
+            {
+                if (fseek (infile, start_ftell, SEEK_SET) != 0)
+                    {
+                        fputs ("ERROR: fseek in push ERROR\n", logfile);
+                        abort();
+                    }
+                char c = '\0';
+                while ((c = getc (infile)) != '[' && c != '\n');
+                if (c == '[')
+                {
+                    if (fscanf (infile, "%d", &elem) == 1)
+                    {
+                        fprintf (outfile, "%d %d\n", 0x800|cmd_push, elem);
+                        while ((c = getc (infile)) != '\n' && c != ' ');
+                    }
+                    else
+                    {
+                        fputs ("ERROR: push without addres\n", logfile);
+                        abort();
+                    }
+                }
+            }
+        }
+    }
+    else if (command == cmd_pop)
+    {
+        long start_ftell = ftell (infile);
+        int elem = 0;
+        char text[12] = "";
+        fscanf (infile, "%s", text);
+        int i = 0;
+        for (; i < 4; i++)
+            if (strcmp (registers[i].str, text) == 0)
+            {
+                fprintf (outfile, "%d %d\n", 0x400|cmd_pop, registers[i].value);
+                i--;
                 break;
             }
-
-            if (strcmp (spaceSPU::commands[i], s) == 0)
+        if (i == 4)
+        {
+            if (fseek (infile, start_ftell, SEEK_SET) != 0)
+                {
+                    fputs ("ERROR: fseek in pop ERROR\n", logfile);
+                    abort();
+                }
+            char c = '\0';
+            while ((c = getc (infile)) != '[' && c != '\n');
+            if (c == '[')
             {
-                if (i < 7 || i == 18)
+                if (fscanf (infile, "%d", &elem) == 1)
                 {
-                    fprintf (outfile, "%d\n", spaceSPU::cmds[i]);
-                    break;
-                }
-                else if (i == 7)
-                {
-                    if ((end = push_asm (infile, outfile)) == 1)
-                        fprintf (logfile, "PUSH ERROR (wrong reg) on line %lu!\n", line);
-                    ip++;
-                    break;
-                }
-                else if (i == 9)
-                {
-                    if ((end = pop_asm (infile, outfile)) == 1)
-                        fprintf (logfile, "POP ERROR (wrong reg) on line %lu!\n", line);
-                    ip++;
-                    break;
-                }
-                else if (9 < i && i < 17)
-                {
-                    int newip = 0;
-                    if (fscanf (infile, "%d", &newip) == 0)
-                    {
-                        fprintf (logfile, "asm: JUMP ERROR on line %lu!\n", line);
-                        end = 1;
-                    }
-                    else
-                    {
-                        fprintf (outfile, "%d %d\n", spaceSPU::cmds[i], newip);
-                    }
-                    ip++;
-                    break;
-                }
-                else if (i == 19)
-                {
-                    size_t pointer = 0;
-                    if (fscanf (infile, "%lu", &pointer) == 0 || pointer < 0)
-                    {
-                        fprintf (logfile, "asm: ORG ERROR on line %lu!\n", line);
-                        end = 1;
-                    }
-                    else
-                    {
-                        for (;ip < pointer; ip++)
-                            fprintf (outfile, "%d\n", cmd_HLT);
-                    }
-                    break;
-                }
-                else if (i == 17)
-                {
-                    size_t pointer = 0;
-                    if (fscanf (infile, "%lu", &pointer) == 0 || pointer < 0)
-                    {
-                        fprintf (logfile, "asm: CALL ERROR on line %lu!\n", line);
-                        end = 1;
-                    }
-                    else
-                    {
-                        fprintf (outfile, "%d %lu\n", cmd_call, pointer);
-                    }
-                    ip++;
-                    break;
+                    fprintf (outfile, "%d %d\n", 0x800|cmd_pop, elem);
+                    while ((c = getc (infile)) != '\n' && c != ' ');
                 }
                 else
                 {
-                    fprintf (logfile, "asm: ERROR on line %lu!\n", line);
-                    end = 1;
-                    break;
+                    fputs ("ERROR: pop without addres\n", logfile);
+                    abort();
+
                 }
             }
         }
     }
-    fclose (logfile);
-    fclose (outfile);
-    fclose (infile);
+    return SPU_NO_ERROR;
 }
 
-
-int push_asm (FILE* infile, FILE* outfile)
+bool isstrdigit (char* str)
 {
-    int x = 0;
+    if (str == nullptr) return false;
 
-    if (fscanf (infile, "%d", &x) == 1)
-    {
-        fprintf (outfile, "%d %d\n", cmd_push, x);
+    bool isdgt = true;
+    for (; *str != '\0'; str++)
+        if (isdigit (*str) == 0) return false;
 
-    } else
-    {
-        char y[5] = "";
-        fscanf (infile, "%s", y);
-        for (int j = 0; j < 5; j++)
-        {
-            if (j == 5)
-            {
-                return 1;
-                break;
-            }
-            else if (strcmp(spaceSPU::registers[j], y) == 0)
-            {
-                fprintf (outfile, "%d %d\n", cmd_rpush, j);
-                break;
-            }
-        }
-    }
-    return 0;
+    return true;
 }
 
-int pop_asm (FILE* infile, FILE* outfile)
+SPU_ERROR asm_jmp (spu* command, marker* markers, FILE* infile, FILE* outfile, FILE* logfile,
+size_t size_markers)
 {
-    char x[5] = "";
-    fscanf (infile, "%s", x);
-    for (int j = 0; j < 5; j++)
-    {
-        if (j == 5)
-        {
-            return 1;
-            break;
-        }
-        else if (strcmp(spaceSPU::registers[j], x) == 0)
-        {
-            fprintf (outfile, "%d %d\n", cmd_pop, j);
-            break;
-        }
-    }
-    return 0;
-}
+    if (command == nullptr || markers == nullptr || infile == nullptr ||
+    outfile == nullptr || logfile == nullptr) return SPU_NULLPTR;
 
+    size_t addres = 0;
+    if (fscanf (infile, "%lu", &addres) == 1)
+    {
+        fprintf (outfile, "%d %lu\n", *command, addres);
+        return SPU_NO_ERROR;
+    }
+
+    char mark[32] = "";
+    if (fscanf (infile, "%s", mark) == 0)
+        return SPU_NO_MARKER_ERROR;
+
+    mark[strlen(mark)] = ':';
+    for (size_t i = 0; i < size_markers; i++)
+        if (strcmp (markers[i].str, mark) == 0)
+        {
+            fprintf (outfile, "%d %lu\n", *command, markers[i].value);
+            return SPU_NO_ERROR;
+        }
+
+    return SPU_NO_MARKER_ERROR;
+}
