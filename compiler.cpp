@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include "spu.h"
 #include <stdlib.h>
+#include <stdint.h>
 
+#define command_mask(x) 0x001F&x
+#define memory_mask(x) (x >> 13)&0x0007
+#define RAM 4
+#define REGISTER 2
+#define NUMBER 1
+#define RAM_SIZE 10737418240 // = 10 * 2^30
 
 int main()
 {
@@ -12,10 +19,17 @@ int main()
     SPU_ERROR err = SPU_NO_ERROR;
     STACK_ERROR err_stk = STACK_NO_ERROR;
 
-    int* program;
+    int16_t* program;
     if ((err = ProgramCtor (&program, "asm.txt")) != SPU_NO_ERROR)
     {
         fprintf (logfile, "ProgramCtor ERROR = %d\n", err);
+        abort();
+    }
+
+    int16_t* ram = (int16_t*) calloc (1, RAM_SIZE);
+    if (ram == nullptr)
+    {
+        fputs ("RAM HAS SIZE 0\n", logfile);
         abort();
     }
 
@@ -28,17 +42,45 @@ int main()
             fputs ("Canary died!\n", logfile);
             SPU_DUMP (p, logfile);
         }
-        switch (program[p.ip])
+        switch (command_mask (program[p.ip]))
         {
 
             case cmd_push:
-                elem = program[++p.ip];
+                elem = program[p.ip + 1];
                 if ((err_stk = StackPush (&(p.stk), &elem)) != STACK_NO_ERROR)
                 {
                     fprintf (logfile, "PUSH ERROR = %d\n", err_stk);
                     SPU_DUMP (p, logfile);
                     abort();
                 }
+                if (memory_mask(program[p.ip]) == REGISTER)
+                    switch (elem)
+                    {
+                        case ax:
+                            StackPush (&(p.stk), &(p.rax));
+                            break;
+                        case bx:
+                            StackPush (&(p.stk), &(p.rbx));
+                            break;
+                        case cx:
+                            StackPush (&(p.stk), &(p.rcx));
+                            break;
+                        case dx:
+                            StackPush (&(p.stk), &(p.rdx));
+                            break;
+                    }
+                else if (memory_mask(program[p.ip]) == NUMBER)
+                    StackPush (&(p.stk), &elem);
+
+                //else if (memory_mask (program[p.ip]) == RAM)
+
+                else
+                {
+                    fprintf (logfile, "PUSH ERROR\n");
+                    SPU_DUMP (p, logfile);
+                    abort();
+                }
+                p.ip++;
                 break;
 
             case cmd_add:
@@ -154,43 +196,32 @@ int main()
                 printf ("%d\n", elem);
                 break;
 
-            case cmd_rpush:
-                elem = program[++p.ip];
-
-                    switch (elem)
+            case cmd_pop:
+                if (memory_mask(program[p.ip]) == REGISTER)
+                    switch (program[p.ip + 1])
                     {
                         case ax:
-                            StackPush (&(p.stk), &(p.rax));
+                            StackPop (&(p.stk), &(p.rax));
                             break;
                         case bx:
-                            StackPush (&(p.stk), &(p.rbx));
+                            StackPop (&(p.stk), &(p.rbx));
                             break;
                         case cx:
-                            StackPush (&(p.stk), &(p.rcx));
+                            StackPop (&(p.stk), &(p.rcx));
                             break;
                         case dx:
-                            StackPush (&(p.stk), &(p.rdx));
+                            StackPop (&(p.stk), &(p.rdx));
                             break;
                     }
-
-                break;
-
-            case cmd_pop:
-                switch (program[++p.ip])
+                //else if (memory_mask (program[p.ip]) == RAM)
+                else
                 {
-                    case ax:
-                        StackPop (&(p.stk), &(p.rax));
-                        break;
-                    case bx:
-                        StackPop (&(p.stk), &(p.rbx));
-                        break;
-                    case cx:
-                        StackPop (&(p.stk), &(p.rcx));
-                        break;
-                    case dx:
-                        StackPop (&(p.stk), &(p.rdx));
-                        break;
+                    fputs ("POP ERROR\n", logfile);
+                    SPU_DUMP (p, logfile);
+                    abort();
                 }
+
+                p.ip++;
                 break;
 
             case cmd_jmp:
@@ -326,7 +357,7 @@ int main()
                 break;
 
             case cmd_ret:
-                int newip = 0;
+                int16_t newip = 0;
                 if (StackPop (&(p.stk_ip), &newip) != STACK_NO_ERROR)
                 {
                     fputs ("RET ERROR", logfile);

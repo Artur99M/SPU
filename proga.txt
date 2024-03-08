@@ -1,27 +1,4 @@
-push 1
-in
-call 100
-out
+push ax
+push [14]
+push 14
 HLT
-string:
-org 100
-pop ax
-push ax
-push 1
-je 118
-push ax
-push ax
-push 1
-sub
-call 100
-mul
-ret;jewfdwkjedfnk
-push 1
-ret
-wudhf:
-welkjfd:
-ioefw:
-ewk:;cewokckekcko,lkemc
-;lw,efdl;w,ew;l,cd
-wedgyu:
-ejfd:

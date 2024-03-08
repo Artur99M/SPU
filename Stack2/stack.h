@@ -2,11 +2,12 @@
 #define STACK_H
 
 #include <stdio.h>
+#include <ctype.h>
 #include "stack_protection.h"
 
 const int changesize = 2;
 
-typedef int elem_t;
+typedef int16_t elem_t;
 
 struct stack {
     canary_t canary_left;

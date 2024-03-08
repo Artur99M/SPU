@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <math.h>
 #include <time.h>
+#include <stdint.h>
 
 static const canary_t SPU_canary = time(NULL) * sin(time(NULL));
 
@@ -82,30 +83,7 @@ void SpuDump (const SPU p, char* name, char* file, int numline, const char* func
     fprintf (outfile, "   }\n}\n>>> SPU_DUMP() has been finished\n\n\n");
 }
 
-// SPU_ERROR ProgramCtor (int** program, char* infile_name)
-// {
-//     FILE* infile = fopen (infile_name, "r");
-//
-//     struct stat buff;
-//     stat (infile_name, &buff);
-//     size_t program_size = buff.st_size;
-//
-//     if (infile == nullptr) return SPU_FOPEN_ERROR;
-//     stack s = {};
-//     if (StackCtor (&s) != STACK_NO_ERROR) return STACK_CTOR_ERROR;
-//     for (int i = 0; i <= program_size; i++)
-//     {
-//         elem_t x = 0;
-//         fscanf (infile, "%d", &x);
-//         if (StackPush (&s, &x) != STACK_NO_ERROR) return STACKPUSH_ERROR;
-//     }
-//
-//     if (fclose (infile) != 0) return SPU_FCLOSE_ERROR;
-//
-//     *program = s.data;
-//
-//     return SPU_NO_ERROR;
-// }
+
 
 SPU_ERROR IsAliveSPUCanary (SPU* p)
 {
@@ -118,7 +96,7 @@ SPU_ERROR IsAliveSPUCanary (SPU* p)
     return (SPU_ERROR) ERROR;
 }
 
-SPU_ERROR ProgramCtor (int** program, char* infile_name)
+SPU_ERROR ProgramCtor (int16_t** program, char* infile_name)
 {
     FILE* infile = fopen (infile_name, "r");
 
@@ -126,9 +104,9 @@ SPU_ERROR ProgramCtor (int** program, char* infile_name)
     stat(infile_name, &buff);
     size_t program_size = (size_t) buff.st_size;
 
-    if ((*program = (int*) calloc (program_size, sizeof(int))) == nullptr)
+    if ((*program = (int16_t*) calloc (program_size, sizeof(int16_t))) == nullptr)
         return PROGRAM_CALLOC_ERROR;
-    for (size_t i = 0; fscanf (infile, "%d", *program + i) == 1; i++);
+    for (size_t i = 0; fscanf (infile, "%hd", *program + i) == 1; i++);
 
     return SPU_NO_ERROR;
 }

@@ -1,7 +1,6 @@
 #ifndef SPU_H
 #define SPU_H
 
-#define forever for(;;)
 #include "Stack2/stack.h"
 #include "Stack2/stack_protection.h"
 #define SPU_DUMP(p, file) SpuDump (p, #p, __FILE__, __LINE__, __func__, file)
@@ -46,7 +45,8 @@ enum SPU_ERROR
     TWO_TWO_CANARIES_DIED = 768,
     PROGRAM_CALLOC_ERROR  = 1024,
     SPU_NO_COMMAND_ERROR  = 2048,
-    SPU_MARKER            = 4096
+    SPU_MARKER            = 4096,
+    SPU_NO_MARKER_ERROR   = 8192
 
 };
 
@@ -79,7 +79,7 @@ struct SPU
 void SpuDump (SPU p, char* name, char* file, int numline, const char* func, FILE* outfile);
 SPU_ERROR SpuCtor (SPU* p);
 SPU_ERROR SpuDtor (SPU* p);
-SPU_ERROR ProgramCtor (int** program, char* infile_name);
+SPU_ERROR ProgramCtor (int16_t** program, char* infile_name);
 SPU_ERROR IsAliveSPUCanary (SPU* p);
 
 const commands cmds[] = {

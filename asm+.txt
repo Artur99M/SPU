@@ -1,0 +1,4 @@
+push ax
+push [14]
+push 14
+HLT

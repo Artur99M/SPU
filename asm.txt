@@ -1,40 +1,4 @@
-push
-1
-in
-call
-100
-out
-HLT
-string:
-org
-100
-pop
-ax
-push
-ax
-push
-1
-je
-118
-push
-ax
-push
-ax
-push
-1
-sub
-call
-100
-mul
-ret
-push
-1
-ret
-wudhf:
-welkjfd:
-ioefw:
-ewk:
-
-wedgyu:
-ejfd:
-
+16391 0
+32775 14
+8199 14
+0
