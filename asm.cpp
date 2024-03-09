@@ -15,9 +15,9 @@ struct marker
 };
 
 SPU_ERROR command_init (spu* command, marker* markers, char* str_command);
-SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command);
+SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, FILE* bin, spu command);
 SPU_ERROR asm_jmp     (spu* command, marker* markers, FILE* infile, FILE* outfile, FILE* logfile,
-size_t size_markers);
+size_t size_markers, FILE* bin);
 bool isstrdigit (char* str);
 
 int main ()
@@ -35,6 +35,7 @@ int main ()
     outSRC (&txt, "asm+.txt");
     FILE* infile  = fopen ("asm+.txt", "r");
     FILE* outfile = fopen ("asm.txt" , "w");
+    FILE* bin = fopen ("asm.bin", "wb");
     struct stat buff;
     stat("asm+.txt", &buff);
     size_t size_asm = (size_t) buff.st_size;
@@ -95,7 +96,7 @@ int main ()
         fscanf (infile, "%s", str_command);
         if (command_init (&command, markers, str_command) == SPU_NO_ERROR)
             if ((int) command < 9 || command == cmd_ret)
-                asm_commads (logfile, infile, outfile, command);
+                asm_commads (logfile, infile, outfile, bin, command);
             if (command == dir_org)
             {
                 size_t q = 0;
@@ -105,13 +106,16 @@ int main ()
                     abort();
                 }
                 for (; q > 0; q--)
+                {
                     fprintf (outfile, "%d\n", cmd_HLT);
+                    fwrite (
             }
             if (9 <= (int) command && (int) command < 17)
-                asm_jmp (&command, markers, infile, outfile, logfile, size_markers);
+                asm_jmp (&command, markers, infile, outfile, logfile, size_markers, bin);
 
     }
 
+    fclose (bin);
     fclose (outfile);
     fclose (infile);
     fclose (logfile);
@@ -129,7 +133,7 @@ SPU_ERROR command_init (spu* command, marker* markers, char* str_command)
 
     return SPU_NO_ERROR;
 }
-SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, spu command)
+SPU_ERROR asm_commads (FILE* logfile, FILE* infile, FILE* outfile, FILE* bin, spu command)
 {
     if ((int) command < 7 || command == cmd_ret)
         fprintf (outfile, "%d\n", command);
@@ -235,8 +239,8 @@ bool isstrdigit (char* str)
     return true;
 }
 
-SPU_ERROR asm_jmp (spu* command, marker* markers, FILE* infile, FILE* outfile, FILE* logfile,
-size_t size_markers)
+SPU_ERROR asm_jmp     (spu* command, marker* markers, FILE* infile, FILE* outfile, FILE* logfile,
+size_t size_markers, FILE* bin)
 {
     if (command == nullptr || markers == nullptr || infile == nullptr ||
     outfile == nullptr || logfile == nullptr) return SPU_NULLPTR;
